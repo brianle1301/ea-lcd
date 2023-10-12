@@ -67,7 +67,7 @@ const Root = function () {
                     if (repCount === 0) {
                         navigate('/partial-rep-done');
                     } else {
-                        navigate('/full-rep-done');
+                        navigate(`/full-rep-done?repCount=${repCount + 1}`);
                     }
 
                     return;

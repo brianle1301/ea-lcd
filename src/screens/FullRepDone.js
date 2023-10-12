@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import { Typography } from '@mui/joy';
 import Particles from 'react-particles';
 import { loadFull } from 'tsparticles';
@@ -5,13 +6,17 @@ import { loadFull } from 'tsparticles';
 import Body from '../components/Body';
 
 const FullRepDone = function () {
+    const [searchParams] = useSearchParams();
+
     const initialiseParticles = function (engine) {
         loadFull(engine);
     };
 
     return (
         <Body>
-            <Typography level="h1">Great! You did 2 sets!! Go again?</Typography>
+            <Typography level="h1">
+                Great! You did {searchParams.get('repCount')} sets!! Go again?
+            </Typography>
 
             <Particles
                 init={initialiseParticles}
