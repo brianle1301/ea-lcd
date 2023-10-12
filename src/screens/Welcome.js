@@ -20,7 +20,7 @@ const Welcome = function () {
             if (i === 0) {
                 setTimeout(() => {
                     setIndex(1);
-                }, 1000);
+                }, 500);
             }
         },
     });

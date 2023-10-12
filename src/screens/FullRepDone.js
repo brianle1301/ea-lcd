@@ -11,7 +11,7 @@ const FullRepDone = function () {
 
     return (
         <Body>
-            <Typography level="h1">Great! You did a set!! Go again?</Typography>
+            <Typography level="h1">Great! You did 2 sets!! Go again?</Typography>
 
             <Particles
                 init={initialiseParticles}

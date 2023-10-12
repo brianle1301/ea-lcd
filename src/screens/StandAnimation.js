@@ -6,7 +6,7 @@ const StandAnimation = function () {
     return (
         <Body>
             <Typography level="h2" mb={2}>
-                Give it a try!
+                Hey, want to move? Give this a try!
             </Typography>
             <video src="/assets/stand.mov" autoPlay muted loop width={480} />
         </Body>
