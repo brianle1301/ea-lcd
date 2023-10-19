@@ -1,16 +1,16 @@
 import { useSearchParams } from 'react-router-dom';
 import { Typography } from '@mui/joy';
-import Particles from 'react-particles';
-import { loadFull } from 'tsparticles';
+// import Particles from 'react-particles';
+//import { loadFull } from 'tsparticles';
 
 import Body from '../components/Body';
 
 const FullRepDone = function () {
     const [searchParams] = useSearchParams();
 
-    const initialiseParticles = function (engine) {
+    /*const initialiseParticles = function (engine) {
         loadFull(engine);
-    };
+    };*/
 
     return (
         <Body>
@@ -18,7 +18,7 @@ const FullRepDone = function () {
                 Great! You did {searchParams.get('repCount')} sets!! Go again?
             </Typography>
 
-            <Particles
+            {/*<Particles
                 init={initialiseParticles}
                 options={{
                     fullScreen: {
@@ -122,7 +122,7 @@ const FullRepDone = function () {
                         },
                     },
                 }}
-            />
+            />*/}
         </Body>
     );
 };

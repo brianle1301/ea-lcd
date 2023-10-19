@@ -8,7 +8,6 @@ const SitAnimation = function () {
             <Typography level="h2" mb={2}>
                 Give it a try!
             </Typography>
-            <video src="/assets/sit.mov" autoPlay muted loop width={480} />
         </Body>
     );
 };

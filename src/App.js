@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, RouterProvider, createBrowserRouter, useNavigate } from 'react-router-dom';
-import { CssVarsProvider, CssBaseline } from '@mui/joy';
+import { CssVarsProvider, CssBaseline, Box, Stack } from '@mui/joy';
 
 import Welcome from './screens/Welcome';
 import FirstSitting from './screens/FirstSitting';
@@ -14,6 +14,7 @@ import FullRepDone from './screens/FullRepDone';
 const Root = function () {
     const [prevMove, setPrevMove] = React.useState();
     const [repCount, setRepCount] = React.useState(0);
+    const [event, setEvent] = React.useState();
     const ws = React.useRef(null);
 
     const navigate = useNavigate();
@@ -47,16 +48,34 @@ const Root = function () {
         ws.current.onmessage = (message) => {
             const event = JSON.parse(message.data).event;
             console.log(event);
-            if (event === 'StandUp/Down') {
+
+            setEvent({ event });
+
+            if (event === 'Stand Up') {
                 if (!prevMove) {
-                    setPrevMove('Sit');
-                    navigate('/stand-anim');
+                    setPrevMove('Stand');
+                    navigate('/sit-anim');
                     return;
                 }
 
                 if (prevMove === 'Sit') {
                     setPrevMove('Stand');
-                    navigate('/sit-anim');
+                    setRepCount(repCount + 1);
+
+                    if (repCount === 0) {
+                        navigate('/partial-rep-done');
+                    } else {
+                        navigate(`/full-rep-done?repCount=${repCount + 1}`);
+                    }
+
+                    return;
+                }
+            }
+
+            if (event === 'Stand Down') {
+                if (!prevMove) {
+                    setPrevMove('Sit');
+                    navigate('/stand-anim');
                     return;
                 }
 
@@ -76,7 +95,52 @@ const Root = function () {
         };
     }, [prevMove, repCount]);
 
-    return <Outlet />;
+    return (
+        <React.Fragment>
+            <Stack spacing={1}>
+                <Stack direction="row" spacing={1}>
+                    <Square type="Left Arm" event={event} />
+                    <Square type="Right Arm" event={event} />
+                </Stack>
+                <Stack direction="row" spacing={1}>
+                    <Square type="Left Leg" event={event} />
+                    <Square type="Right Leg" event={event} />
+                </Stack>
+            </Stack>
+            <Outlet />
+        </React.Fragment>
+    );
+};
+
+const Square = function ({ type, event }) {
+    const [on, setOn] = React.useState(event.event === type);
+    const timeout = React.useRef(null);
+
+    React.useEffect(() => {
+        const isOn = event.event === type;
+
+        if (isOn) {
+            if (timeout.current) {
+                clearTimeout(timeout.current);
+            }
+
+            setOn(true);
+
+            timeout.current = setTimeout(() => {
+                setOn(false);
+            }, 1000);
+        }
+    }, [event]);
+
+    React.useEffect(() => {
+        return () => {
+            if (timeout.current) {
+                clearTimeout(timeout.current);
+            }
+        };
+    }, []);
+
+    return <Box flex={1} height={60} bgcolor={on ? 'success.solidBg' : 'neutral.solidBg'}></Box>;
 };
 
 const router = createBrowserRouter([

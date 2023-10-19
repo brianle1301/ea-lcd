@@ -8,7 +8,6 @@ const StandAnimation = function () {
             <Typography level="h2" mb={2}>
                 Hey, want to move? Give this a try!
             </Typography>
-            <video src="/assets/stand.mov" autoPlay muted loop width={480} />
         </Body>
     );
 };
