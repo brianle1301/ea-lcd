@@ -14,7 +14,7 @@ import FullRepDone from './screens/FullRepDone';
 const Root = function () {
     const [prevMove, setPrevMove] = React.useState();
     const [repCount, setRepCount] = React.useState(0);
-    const [event, setEvent] = React.useState();
+    const [event, setEvent] = React.useState({ event: null });
     const ws = React.useRef(null);
 
     const navigate = useNavigate();
