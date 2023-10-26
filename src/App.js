@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, RouterProvider, createBrowserRouter, useNavigate } from 'react-router-dom';
-import { CssVarsProvider, CssBaseline, Box, Stack } from '@mui/joy';
+import { CssVarsProvider, CssBaseline, Box, Stack, Typography } from '@mui/joy';
+import { Star, Chair } from '@phosphor-icons/react';
 
 import Welcome from './screens/Welcome';
 import FirstSitting from './screens/FirstSitting';
@@ -11,10 +12,16 @@ import SubsequentSets from './screens/SubsequentSets';
 import PartialRepDone from './screens/PartialRepDone';
 import FullRepDone from './screens/FullRepDone';
 
+const INITIAL_STATES = {
+    SITTED: 0,
+    STOOD_UP: 1,
+};
+
 const Root = function () {
-    const [prevMove, setPrevMove] = React.useState();
-    const [repCount, setRepCount] = React.useState(0);
-    const [event, setEvent] = React.useState({ event: null });
+    const [trailingMove, setTrailingMove] = React.useState();
+    const [leadingMove, setLeadingMove] = React.useState();
+    const [repHistory, setRepHistory] = React.useState([]);
+    const [event, setEvent] = React.useState({ type: null });
     const ws = React.useRef(null);
 
     const navigate = useNavigate();
@@ -26,6 +33,7 @@ const Root = function () {
 
             socket.onopen = () => {
                 console.log('Connection opened');
+                socket.send('INITIAL_STATE');
             };
 
             socket.onclose = () => {
@@ -46,12 +54,86 @@ const Root = function () {
         }
 
         ws.current.onmessage = (message) => {
-            const event = JSON.parse(message.data).event;
+            const event = JSON.parse(message.data);
             console.log(event);
 
-            setEvent({ event });
+            if (!trailingMove) {
+                if (event.initialState) {
+                    setTrailingMove(event.initialState);
+                }
 
-            if (event === 'Stand Up') {
+                return;
+            }
+
+            if (event.initialState) {
+                return;
+            }
+
+            setEvent(event);
+
+            if (!leadingMove) {
+                if (
+                    (event.type === 'Stand Up' || event.type === 'Sitted') &&
+                    event.type !== trailingMove
+                ) {
+                    setLeadingMove(event.type);
+                }
+
+                return;
+            }
+
+            if (
+                (leadingMove === 'Stand Up' && event.type === 'Sitted') ||
+                (leadingMove === 'Sitted' && event.type === 'Stand Up')
+            ) {
+                setLeadingMove(null);
+                setTrailingMove(event.type);
+                setRepHistory([
+                    ...repHistory,
+                    { type: leadingMove + '/' + event.type, ts: Date.now() },
+                ]);
+            }
+        };
+    }, [trailingMove, leadingMove, repHistory]);
+
+    // Calculate power rep count
+
+    let powerRepCount = 0;
+
+    if (repHistory.length > 1) {
+        let powered = false;
+        for (let i = 1; i < repHistory.length; i++) {
+            if (repHistory[i].ts - repHistory[i - 1].ts <= 30 * 1000) {
+                if (!powered) {
+                    powerRepCount++;
+                    powered = true;
+                }
+            } else if (powered) {
+                powered = false;
+            }
+        }
+    }
+
+    React.useEffect(() => {
+        console.log(repHistory);
+    }, [repHistory]);
+
+    /*React.useEffect(() => {
+        if (!ws.current) {
+            return;
+        }
+
+        ws.current.onmessage = (message) => {
+            const event = JSON.parse(message.data);
+            console.log(event);
+
+            setEvent(event);
+
+            if (!currentState) {
+                setCurrentState();
+            }
+
+            if (event.event === 'Stand Up') {
                 if (!prevMove) {
                     setPrevMove('Stand');
                     navigate('/sit-anim');
@@ -72,7 +154,7 @@ const Root = function () {
                 }
             }
 
-            if (event === 'Stand Down') {
+            if (event.event === 'Stand Down') {
                 if (!prevMove) {
                     setPrevMove('Sit');
                     navigate('/stand-anim');
@@ -93,7 +175,7 @@ const Root = function () {
                 }
             }
         };
-    }, [prevMove, repCount]);
+    }, [prevMove, repCount]);*/
 
     return (
         <React.Fragment>
@@ -106,6 +188,16 @@ const Root = function () {
                     <Square type="Left Leg" event={event} />
                     <Square type="Right Leg" event={event} />
                 </Stack>
+                <Stack direction="row" spacing={4}>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                        <Star size={40} />
+                        <Typography level="h1">{powerRepCount}</Typography>
+                    </Stack>
+                    <Stack direction="row" alignItems="center" spacing={1}>
+                        <Chair size={40} />
+                        <Typography level="h1">{repHistory.length}</Typography>
+                    </Stack>
+                </Stack>
             </Stack>
             <Outlet />
         </React.Fragment>
@@ -113,11 +205,11 @@ const Root = function () {
 };
 
 const Square = function ({ type, event }) {
-    const [on, setOn] = React.useState(event.event === type);
+    const [on, setOn] = React.useState(event.type === type);
     const timeout = React.useRef(null);
 
     React.useEffect(() => {
-        const isOn = event.event === type;
+        const isOn = event.type === type;
 
         if (isOn) {
             if (timeout.current) {
