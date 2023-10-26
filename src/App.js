@@ -73,7 +73,7 @@ const Root = function () {
 
             if (!leadingMove) {
                 if (
-                    (event.type === 'Stand Up' || event.type === 'Sitted') &&
+                    (event.type.startsWith('Stand Up') || event.type === 'Sitted') &&
                     event.type !== trailingMove
                 ) {
                     setLeadingMove(event.type);
@@ -83,8 +83,8 @@ const Root = function () {
             }
 
             if (
-                (leadingMove === 'Stand Up' && event.type === 'Sitted') ||
-                (leadingMove === 'Sitted' && event.type === 'Stand Up')
+                (leadingMove.startsWith('Stand Up') && event.type === 'Sitted') ||
+                (leadingMove === 'Sitted' && event.type.startsWith('Stand Up'))
             ) {
                 setLeadingMove(null);
                 setTrailingMove(event.type);
