@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, RouterProvider, createBrowserRouter, useNavigate } from 'react-router-dom';
-import { CssVarsProvider, CssBaseline, Box, Stack, Typography } from '@mui/joy';
+import { CssVarsProvider, CssBaseline, Box, Stack, Typography, Snackbar } from '@mui/joy';
 import { Star, Chair } from '@phosphor-icons/react';
 
 import Welcome from './screens/Welcome';
@@ -12,19 +12,14 @@ import SubsequentSets from './screens/SubsequentSets';
 import PartialRepDone from './screens/PartialRepDone';
 import FullRepDone from './screens/FullRepDone';
 
-const INITIAL_STATES = {
-    SITTED: 0,
-    STOOD_UP: 1,
-};
-
 const Root = function () {
     const [trailingMove, setTrailingMove] = React.useState();
     const [leadingMove, setLeadingMove] = React.useState();
     const [repHistory, setRepHistory] = React.useState([]);
     const [event, setEvent] = React.useState({ type: null });
+    const [reminderOpen, setReminderOpen] = React.useState(false);
     const ws = React.useRef(null);
-
-    const navigate = useNavigate();
+    const reminderTimer = React.useRef(null);
 
     React.useEffect(() => {
         const connect = function () {
@@ -57,15 +52,11 @@ const Root = function () {
             const event = JSON.parse(message.data);
             console.log(event);
 
-            if (!trailingMove) {
-                if (event.initialState) {
+            if (event.initialState) {
+                if (!trailingMove) {
                     setTrailingMove(event.initialState);
                 }
 
-                return;
-            }
-
-            if (event.initialState) {
                 return;
             }
 
@@ -77,6 +68,8 @@ const Root = function () {
                     event.type !== trailingMove
                 ) {
                     setLeadingMove(event.type);
+                    setReminderOpen(false);
+                    clearTimeout(reminderTimer.current);
                 }
 
                 return;
@@ -90,26 +83,51 @@ const Root = function () {
                 setTrailingMove(event.type);
                 setRepHistory([
                     ...repHistory,
-                    { type: leadingMove + '/' + event.type, ts: Date.now() },
+                    { movements: [leadingMove, event.type], ts: Date.now() },
                 ]);
+
+                reminderTimer.current = setTimeout(() => {
+                    setReminderOpen(true);
+                }, 20000);
             }
         };
     }, [trailingMove, leadingMove, repHistory]);
 
+    const standFirstReps = repHistory.filter((rep) =>
+        rep.movements[0].startsWith('Stand Up')
+    ).length;
+
     // Calculate power rep count
 
-    let powerRepCount = 0;
+    const powerRepCounts = { standUpFirst: 0, sitDownFirst: 0 };
+    console.log(repHistory);
 
     if (repHistory.length > 1) {
-        let powered = false;
+        const powered = { standUpFirst: false, sitDownFirst: false };
         for (let i = 1; i < repHistory.length; i++) {
-            if (repHistory[i].ts - repHistory[i - 1].ts <= 30 * 1000) {
-                if (!powered) {
-                    powerRepCount++;
-                    powered = true;
+            const currentRep = repHistory[i];
+            const prevRep = repHistory[i - 1];
+            if (
+                (currentRep.movements[0].startsWith('Stand Up') &&
+                    prevRep.movements[0].startsWith('Stand Up')) ||
+                currentRep.movements[0] === prevRep.movements[0]
+            ) {
+                const key =
+                    currentRep.movements[0].startsWith('Stand Up') &&
+                    prevRep.movements[0].startsWith('Stand Up')
+                        ? 'standUpFirst'
+                        : 'sitDownFirst';
+
+                console.log(currentRep.ts - prevRep.ts);
+
+                if (currentRep.ts - prevRep.ts <= 10 * 1000) {
+                    if (!powered[key]) {
+                        powerRepCounts[key]++;
+                        powered[key] = true;
+                    }
+                } else if (powered[key]) {
+                    powered[key] = false;
                 }
-            } else if (powered) {
-                powered = false;
             }
         }
     }
@@ -117,65 +135,6 @@ const Root = function () {
     React.useEffect(() => {
         console.log(repHistory);
     }, [repHistory]);
-
-    /*React.useEffect(() => {
-        if (!ws.current) {
-            return;
-        }
-
-        ws.current.onmessage = (message) => {
-            const event = JSON.parse(message.data);
-            console.log(event);
-
-            setEvent(event);
-
-            if (!currentState) {
-                setCurrentState();
-            }
-
-            if (event.event === 'Stand Up') {
-                if (!prevMove) {
-                    setPrevMove('Stand');
-                    navigate('/sit-anim');
-                    return;
-                }
-
-                if (prevMove === 'Sit') {
-                    setPrevMove('Stand');
-                    setRepCount(repCount + 1);
-
-                    if (repCount === 0) {
-                        navigate('/partial-rep-done');
-                    } else {
-                        navigate(`/full-rep-done?repCount=${repCount + 1}`);
-                    }
-
-                    return;
-                }
-            }
-
-            if (event.event === 'Stand Down') {
-                if (!prevMove) {
-                    setPrevMove('Sit');
-                    navigate('/stand-anim');
-                    return;
-                }
-
-                if (prevMove === 'Stand') {
-                    setPrevMove('Sit');
-                    setRepCount(repCount + 1);
-
-                    if (repCount === 0) {
-                        navigate('/partial-rep-done');
-                    } else {
-                        navigate(`/full-rep-done?repCount=${repCount + 1}`);
-                    }
-
-                    return;
-                }
-            }
-        };
-    }, [prevMove, repCount]);*/
 
     return (
         <React.Fragment>
@@ -191,14 +150,30 @@ const Root = function () {
                 <Stack direction="row" spacing={4}>
                     <Stack direction="row" alignItems="center" spacing={1}>
                         <Star size={40} />
-                        <Typography level="h1">{powerRepCount}</Typography>
+                        <Typography level="h1">
+                            {powerRepCounts.standUpFirst + powerRepCounts.sitDownFirst} (Stand Up
+                            first: {powerRepCounts.standUpFirst}, Sit Down first:{' '}
+                            {powerRepCounts.sitDownFirst})
+                        </Typography>
                     </Stack>
                     <Stack direction="row" alignItems="center" spacing={1}>
                         <Chair size={40} />
-                        <Typography level="h1">{repHistory.length}</Typography>
+                        <Typography level="h1">
+                            {repHistory.length} (Stand Up first: {standFirstReps}, Sit down first:{' '}
+                            {repHistory.length - standFirstReps})
+                        </Typography>
                     </Stack>
                 </Stack>
             </Stack>
+            <Snackbar
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                color="primary"
+                variant="solid"
+                open={reminderOpen}
+                size="lg"
+            >
+                It's been a while since you last do a rep, wanna do one now?
+            </Snackbar>
             <Outlet />
         </React.Fragment>
     );
