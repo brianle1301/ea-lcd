@@ -3,19 +3,40 @@ import { Outlet, RouterProvider, createBrowserRouter, useNavigate } from 'react-
 import { CssVarsProvider, CssBaseline, Box, Stack, Typography, Snackbar } from '@mui/joy';
 import { Star, Chair } from '@phosphor-icons/react';
 
-import Welcome from './screens/Welcome';
-import FirstSitting from './screens/FirstSitting';
-import StandAnimation from './screens/StandAnimation';
-import SitAnimation from './screens/SitAnimation';
-import HaveARest from './screens/HaveARest';
-import SubsequentSets from './screens/SubsequentSets';
-import PartialRepDone from './screens/PartialRepDone';
-import FullRepDone from './screens/FullRepDone';
+import HowItWorks from './screens/HowItWorks';
+import SitDownExplanation from './screens/SitDownExplanation';
+import TryItOut from './screens/TryItOut';
+import StandUpExplanation from './screens/StandUpExplanation';
+import Sleep from './screens/Sleep';
+import BonusExplanation from './screens/BonusExplanation';
+import WhatIsDoItTwice from './screens/WhatIsDoItTwice';
+import DoItTwiceStand from './screens/DoItTwiceStand';
+import DoItTwiceSit from './screens/DoItTwiceSit';
+import FeetGreen from './screens/FeetGreen';
+import HandGreen from './screens/HandGreen';
+import Final from './screens/Final';
+
+const screens = {};
+
+const makeScreens = (name) => (screens[name] = name);
+
+makeScreens('HOW_IT_WORKS');
+makeScreens('SIT_DOWN_EXPLANATION');
+makeScreens('TRY_IT_OUT');
+makeScreens('SLEEPING');
+makeScreens('STAND_UP_EXPLANATION');
+makeScreens('BONUS_EXPLANATION');
+makeScreens('WHAT_IS_DO_IT_TWICE');
+makeScreens('DO_IT_TWICE_STAND');
+makeScreens('DO_IT_TWICE_SIT');
+makeScreens('FEET_GREEN');
+makeScreens('HAND_GREEN');
+makeScreens('FINAL');
 
 const Root = function () {
-    const [trailingMove, setTrailingMove] = React.useState();
-    const [leadingMove, setLeadingMove] = React.useState();
-    const [repHistory, setRepHistory] = React.useState([]);
+    const [moveHistory, setMoveHistory] = React.useState([]);
+    const [currentScreen, setCurrentScreeen] = React.useState(screens.HOW_IT_WORKS);
+    const [initialMove, setInitialMove] = React.useState(null);
     const [event, setEvent] = React.useState({ type: null });
     const [reminderOpen, setReminderOpen] = React.useState(false);
     const ws = React.useRef(null);
@@ -53,8 +74,8 @@ const Root = function () {
             console.log(event);
 
             if (event.initialState) {
-                if (!trailingMove) {
-                    setTrailingMove(event.initialState);
+                if (!initialMove) {
+                    setInitialMove(event.initialState);
                 }
 
                 return;
@@ -62,44 +83,55 @@ const Root = function () {
 
             setEvent(event);
 
-            if (!leadingMove) {
-                if (
-                    (event.type.startsWith('Stand Up') || event.type === 'Sitted') &&
-                    event.type !== trailingMove
-                ) {
-                    setLeadingMove(event.type);
-                    setReminderOpen(false);
-                    clearTimeout(reminderTimer.current);
-                }
-
-                return;
-            }
-
-            if (
-                (leadingMove.startsWith('Stand Up') && event.type === 'Sitted') ||
-                (leadingMove === 'Sitted' && event.type.startsWith('Stand Up'))
-            ) {
-                setLeadingMove(null);
-                setTrailingMove(event.type);
-                setRepHistory([
-                    ...repHistory,
-                    { movements: [leadingMove, event.type], ts: Date.now() },
-                ]);
-
-                reminderTimer.current = setTimeout(() => {
-                    setReminderOpen(true);
-                }, 20000);
-            }
+            setMoveHistory([...moveHistory, { movement: event.event, ts: Date.now() }]);
         };
-    }, [trailingMove, leadingMove, repHistory]);
+    }, [moveHistory, initialMove]);
 
-    const standFirstReps = repHistory.filter((rep) =>
-        rep.movements[0].startsWith('Stand Up')
-    ).length;
+    // Calculate moves count
+
+    const counts = { stands: 0, sits: 0, doubleStands: 0, doubleSits: 0 };
+    let lastStand;
+    let lastSit;
+
+    for (let i = 0; i < moveHistory.length; i++) {
+        const currentMove = moveHistory[i];
+
+        if (currentMove.toLowerCase().startsWith('stand up')) {
+            if (lastStand) {
+                if (currentMove.ts - lastStand.ts <= 15000) {
+                    lastStand = null;
+                    counts.doubleStands++;
+                } else {
+                    lastStand = currentMove;
+                }
+            } else {
+                lastStand = currentMove;
+            }
+
+            counts.stands++;
+            continue;
+        }
+
+        if (currentMove.toLowerCase() === 'sit down') {
+            if (lastSit) {
+                if (currentMove.ts - lastSit.ts <= 15000) {
+                    lastSit = null;
+                    counts.doubleSits++;
+                } else {
+                    lastSit = currentMove;
+                }
+            } else {
+                lastSit = currentMove;
+            }
+
+            counts.sits++;
+            continue;
+        }
+    }
 
     // Calculate power rep count
 
-    const powerRepCounts = { standUpFirst: 0, sitDownFirst: 0 };
+    /*const powerRepCounts = { standUpFirst: 0, sitDownFirst: 0 };
     console.log(repHistory);
 
     if (repHistory.length > 1) {
@@ -130,14 +162,14 @@ const Root = function () {
                 }
             }
         }
-    }
+    }*/
 
     React.useEffect(() => {
-        console.log(repHistory);
-    }, [repHistory]);
+        console.log(moveHistory);
+    }, [moveHistory]);
 
     return (
-        <React.Fragment>
+        <Stack height="100dvh">
             <Stack spacing={1}>
                 <Stack direction="row" spacing={1}>
                     <Square type="Left Arm" event={event} />
@@ -149,18 +181,59 @@ const Root = function () {
                 </Stack>
                 <Stack direction="row" spacing={4}>
                     <Stack direction="row" alignItems="center" spacing={1}>
-                        <Star size={40} />
                         <Typography level="h1">
-                            {powerRepCounts.standUpFirst + powerRepCounts.sitDownFirst} (Stand Up
-                            first: {powerRepCounts.standUpFirst}, Sit Down first:{' '}
-                            {powerRepCounts.sitDownFirst})
+                            <Box
+                                component="img"
+                                mx={2}
+                                height={40}
+                                src="/assets/StandIcon_black.png"
+                            />{' '}
+                            {counts.stands}
+                        </Typography>
+                        <Typography level="h1">
+                            <Box
+                                component="img"
+                                mr={1}
+                                ml={2}
+                                height={40}
+                                src="/assets/StandIcon_black.png"
+                            />
+                            <Box
+                                component="img"
+                                ml={1}
+                                mr={2}
+                                height={40}
+                                src="/assets/StandIcon_black.png"
+                            />
+                            {counts.stands}
                         </Typography>
                     </Stack>
                     <Stack direction="row" alignItems="center" spacing={1}>
-                        <Chair size={40} />
                         <Typography level="h1">
-                            {repHistory.length} (Stand Up first: {standFirstReps}, Sit down first:{' '}
-                            {repHistory.length - standFirstReps})
+                            <Box
+                                component="img"
+                                mx={2}
+                                height={40}
+                                src="/assets/SitIcon_black.png"
+                            />{' '}
+                            {counts.sits}
+                        </Typography>
+                        <Typography level="h1">
+                            <Box
+                                component="img"
+                                mr={1}
+                                ml={2}
+                                height={40}
+                                src="/assets/SitIcon_black.png"
+                            />
+                            <Box
+                                component="img"
+                                ml={1}
+                                mr={2}
+                                height={40}
+                                src="/assets/SitIcon_black.png"
+                            />
+                            {counts.doubleSits}
                         </Typography>
                     </Stack>
                 </Stack>
@@ -174,8 +247,21 @@ const Root = function () {
             >
                 It's been a while since you last do a rep, wanna do one now?
             </Snackbar>
-            <Outlet />
-        </React.Fragment>
+            <Stack alignItems="center" justifyContent="center" flex={1}>
+                <HowItWorks />
+                <SitDownExplanation />
+                <TryItOut />
+                <StandUpExplanation />
+                <Sleep />
+                <BonusExplanation />
+                <WhatIsDoItTwice />
+                <DoItTwiceStand />
+                <DoItTwiceSit />
+                <FeetGreen />
+                <HandGreen />
+                <Final />
+            </Stack>
+        </Stack>
     );
 };
 
@@ -210,52 +296,11 @@ const Square = function ({ type, event }) {
     return <Box flex={1} height={60} bgcolor={on ? 'success.solidBg' : 'neutral.solidBg'}></Box>;
 };
 
-const router = createBrowserRouter([
-    {
-        path: '/',
-        element: <Root />,
-        children: [
-            {
-                path: '/welcome',
-                element: <Welcome />,
-            },
-            {
-                path: '/first-sitting',
-                element: <FirstSitting />,
-            },
-            {
-                path: '/stand-anim',
-                element: <StandAnimation />,
-            },
-            {
-                path: '/sit-anim',
-                element: <SitAnimation />,
-            },
-            {
-                path: '/have-a-rest',
-                element: <HaveARest />,
-            },
-            {
-                path: '/subsequent-sets',
-                element: <SubsequentSets />,
-            },
-            {
-                path: '/partial-rep-done',
-                element: <PartialRepDone />,
-            },
-            {
-                path: '/full-rep-done',
-                element: <FullRepDone />,
-            },
-        ],
-    },
-]);
-
 const App = function () {
     return (
-        <CssVarsProvider defaultMode="system">
+        <CssVarsProvider defaultMode="light">
             <CssBaseline />
-            <RouterProvider router={router} />
+            <Root />
         </CssVarsProvider>
     );
 };
