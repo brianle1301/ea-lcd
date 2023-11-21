@@ -83,7 +83,7 @@ const Root = function () {
 
             setEvent(event);
 
-            setMoveHistory([...moveHistory, { movement: event.event, ts: Date.now() }]);
+            setMoveHistory([...moveHistory, { movement: event.type, ts: Date.now() }]);
         };
     }, [moveHistory, initialMove]);
 
