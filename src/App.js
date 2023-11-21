@@ -96,7 +96,7 @@ const Root = function () {
     for (let i = 0; i < moveHistory.length; i++) {
         const currentMove = moveHistory[i];
 
-        if (currentMove.toLowerCase().startsWith('stand up')) {
+        if (currentMove.movement.toLowerCase().startsWith('stand up')) {
             if (lastStand) {
                 if (currentMove.ts - lastStand.ts <= 15000) {
                     lastStand = null;
@@ -112,7 +112,7 @@ const Root = function () {
             continue;
         }
 
-        if (currentMove.toLowerCase() === 'sit down') {
+        if (currentMove.movement.toLowerCase() === 'sit down') {
             if (lastSit) {
                 if (currentMove.ts - lastSit.ts <= 15000) {
                     lastSit = null;
