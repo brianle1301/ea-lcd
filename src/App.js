@@ -83,7 +83,12 @@ const Root = function () {
 
             setEvent(event);
 
-            setMoveHistory([...moveHistory, { movement: event.type, ts: Date.now() }]);
+            if (
+                event.type.toLowerCase().startsWith('stand up') ||
+                event.type.toLowerCase() === 'sit down'
+            ) {
+                setMoveHistory([...moveHistory, { movement: event.type, ts: Date.now() }]);
+            }
         };
     }, [moveHistory, initialMove]);
 
@@ -205,7 +210,7 @@ const Root = function () {
                                 height={40}
                                 src="/assets/StandIcon_black.png"
                             />
-                            {counts.stands}
+                            {counts.doubleStands}
                         </Typography>
                     </Stack>
                     <Stack direction="row" alignItems="center" spacing={1}>
