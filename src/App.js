@@ -85,7 +85,7 @@ const Root = function () {
 
             if (
                 event.type.toLowerCase().startsWith('stand up') ||
-                event.type.toLowerCase() === 'sit down'
+                event.type.toLowerCase() === 'sitted'
             ) {
                 setMoveHistory([...moveHistory, { movement: event.type, ts: Date.now() }]);
             }
@@ -117,7 +117,7 @@ const Root = function () {
             continue;
         }
 
-        if (currentMove.movement.toLowerCase() === 'sit down') {
+        if (currentMove.movement.toLowerCase() === 'sitted') {
             if (lastSit) {
                 if (currentMove.ts - lastSit.ts <= 15000) {
                     lastSit = null;
