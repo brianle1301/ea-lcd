@@ -184,63 +184,50 @@ const Root = function () {
                     <Square type="Left Leg" event={event} />
                     <Square type="Right Leg" event={event} />
                 </Stack>
-                <Stack direction="row" spacing={4}>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                        <Typography level="h1">
-                            <Box
-                                component="img"
-                                mx={2}
-                                height={40}
-                                src="/assets/StandIcon_black.png"
-                            />{' '}
-                            {counts.stands}
-                        </Typography>
-                        <Typography level="h1">
-                            <Box
-                                component="img"
-                                mr={1}
-                                ml={2}
-                                height={40}
-                                src="/assets/StandIcon_black.png"
-                            />
-                            <Box
-                                component="img"
-                                ml={1}
-                                mr={2}
-                                height={40}
-                                src="/assets/StandIcon_black.png"
-                            />
-                            {counts.doubleStands}
-                        </Typography>
-                    </Stack>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                        <Typography level="h1">
-                            <Box
-                                component="img"
-                                mx={2}
-                                height={40}
-                                src="/assets/SitIcon_black.png"
-                            />{' '}
-                            {counts.sits}
-                        </Typography>
-                        <Typography level="h1">
-                            <Box
-                                component="img"
-                                mr={1}
-                                ml={2}
-                                height={40}
-                                src="/assets/SitIcon_black.png"
-                            />
-                            <Box
-                                component="img"
-                                ml={1}
-                                mr={2}
-                                height={40}
-                                src="/assets/SitIcon_black.png"
-                            />
-                            {counts.doubleSits}
-                        </Typography>
-                    </Stack>
+                <Stack direction="row" justifyContent="space-between" spacing={4}>
+                    <Typography level="h1">
+                        <Box component="img" mx={2} height={40} src="/assets/StandIcon_black.png" />{' '}
+                        {counts.stands}
+                    </Typography>
+                    <Typography level="h1">
+                        <Box
+                            component="img"
+                            mr={1}
+                            ml={2}
+                            height={40}
+                            src="/assets/StandIcon_black.png"
+                        />
+                        <Box
+                            component="img"
+                            ml={1}
+                            mr={2}
+                            height={40}
+                            src="/assets/StandIcon_black.png"
+                        />
+                        {counts.doubleStands}
+                    </Typography>
+
+                    <Typography level="h1">
+                        <Box component="img" mx={2} height={40} src="/assets/SitIcon_black.png" />{' '}
+                        {counts.sits}
+                    </Typography>
+                    <Typography level="h1">
+                        <Box
+                            component="img"
+                            mr={1}
+                            ml={2}
+                            height={40}
+                            src="/assets/SitIcon_black.png"
+                        />
+                        <Box
+                            component="img"
+                            ml={1}
+                            mr={2}
+                            height={40}
+                            src="/assets/SitIcon_black.png"
+                        />
+                        {counts.doubleSits}
+                    </Typography>
                 </Stack>
             </Stack>
             <Snackbar
@@ -253,18 +240,12 @@ const Root = function () {
                 It's been a while since you last do a rep, wanna do one now?
             </Snackbar>
             <Stack alignItems="center" justifyContent="center" flex={1}>
-                <HowItWorks />
                 <SitDownExplanation />
-                <TryItOut />
+
                 <StandUpExplanation />
-                <Sleep />
-                <BonusExplanation />
-                <WhatIsDoItTwice />
+
                 <DoItTwiceStand />
                 <DoItTwiceSit />
-                <FeetGreen />
-                <HandGreen />
-                <Final />
             </Stack>
         </Stack>
     );
