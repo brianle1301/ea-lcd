@@ -184,50 +184,76 @@ const Root = function () {
                     <Square type="Left Leg" event={event} />
                     <Square type="Right Leg" event={event} />
                 </Stack>
-                <Stack direction="row" justifyContent="space-between" spacing={4}>
-                    <Typography level="h1">
-                        <Box component="img" mx={2} height={40} src="/assets/StandIcon_black.png" />{' '}
-                        {counts.stands}
-                    </Typography>
-                    <Typography level="h1">
-                        <Box
-                            component="img"
-                            mr={1}
-                            ml={2}
-                            height={40}
-                            src="/assets/StandIcon_black.png"
-                        />
-                        <Box
-                            component="img"
-                            ml={1}
-                            mr={2}
-                            height={40}
-                            src="/assets/StandIcon_black.png"
-                        />
-                        {counts.doubleStands}
-                    </Typography>
+                <Stack justifyContent="space-between" spacing={4}>
+                    <Stack direction="row" justifyContent="space-between" width={400}>
+                        <Stack display="inline-flex" alignItems="center">
+                            <Box
+                                component="img"
+                                mx={2}
+                                height={60}
+                                src="/assets/StandIcon_black.png"
+                            />
+                            Stands
+                        </Stack>
+                        <Typography level="h1">{counts.stands}</Typography>
+                    </Stack>
+                    <Stack direction="row" justifyContent="space-between" width={400}>
+                        <Stack display="inline-flex" alignItems="center">
+                            <div>
+                                <Box
+                                    component="img"
+                                    mr={1}
+                                    ml={2}
+                                    height={60}
+                                    src="/assets/StandIcon_black.png"
+                                />
+                                <Box
+                                    component="img"
+                                    ml={-2}
+                                    mr={2}
+                                    height={60}
+                                    src="/assets/StandIcon_black.png"
+                                />
+                            </div>
+                            Double Stands
+                        </Stack>
+                        <Typography level="h1">{counts.doubleStands}</Typography>
+                    </Stack>
+                    <Stack direction="row" justifyContent="space-between" width={400}>
+                        <Stack display="inline-flex" alignItems="center">
+                            <Box
+                                component="img"
+                                mx={2}
+                                height={60}
+                                src="/assets/SitIcon_black.png"
+                            />
+                            Sits
+                        </Stack>
+                        <Typography level="h1">{counts.sits}</Typography>
+                    </Stack>
 
-                    <Typography level="h1">
-                        <Box component="img" mx={2} height={40} src="/assets/SitIcon_black.png" />{' '}
-                        {counts.sits}
-                    </Typography>
-                    <Typography level="h1">
-                        <Box
-                            component="img"
-                            mr={1}
-                            ml={2}
-                            height={40}
-                            src="/assets/SitIcon_black.png"
-                        />
-                        <Box
-                            component="img"
-                            ml={1}
-                            mr={2}
-                            height={40}
-                            src="/assets/SitIcon_black.png"
-                        />
-                        {counts.doubleSits}
-                    </Typography>
+                    <Stack direction="row" justifyContent="space-between" width={400}>
+                        <Stack display="inline-flex" alignItems="center">
+                            <div>
+                                <Box
+                                    component="img"
+                                    mr={1}
+                                    ml={2}
+                                    height={60}
+                                    src="/assets/SitIcon_black.png"
+                                />
+                                <Box
+                                    component="img"
+                                    ml={1}
+                                    mr={2}
+                                    height={60}
+                                    src="/assets/SitIcon_black.png"
+                                />
+                            </div>
+                            Double Sits
+                        </Stack>
+                        <Typography level="h1">{counts.doubleSits}</Typography>
+                    </Stack>
                 </Stack>
             </Stack>
             <Snackbar
