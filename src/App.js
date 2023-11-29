@@ -189,7 +189,7 @@ const Root = function () {
                         <Stack display="inline-flex" alignItems="center">
                             <Box
                                 component="img"
-                                mx={2}
+                                mr={2}
                                 height={60}
                                 src="/assets/StandIcon_black.png"
                             />
@@ -202,8 +202,6 @@ const Root = function () {
                             <div>
                                 <Box
                                     component="img"
-                                    mr={1}
-                                    ml={2}
                                     height={60}
                                     src="/assets/StandIcon_black.png"
                                 />
